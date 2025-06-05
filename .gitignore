@@ -1,18 +1,12 @@
-# Pliki Pythona
 __pycache__/
-*.py[cod]
-
-# Modele i dane tymczasowe
-*.pkl
-preprocessed.csv
-
-# Środowisko
-.env
+*.pyc
+*.pyo
+.venv/
 venv/
 env/
-
-# IDE/system
-.vscode/
-.idea/
+.env
+*.db
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
