@@ -4,32 +4,11 @@ Aplikacja internetowa do automatycznej analizy sentymentu recenzji filmowych z w
 
 ##  Instalacja
 
-### 1. Sklonuj repozytorium
+### 1. Uruchomienie z Dockera
 ```bash
 git clone https://github.com/xaqexa/movie-sentiment.git
 cd movie-sentiment
-```
-### 2. Stwórz środowisko wirtualne
-```bash
-python -m venv .venv
-
-# Windows
-.venv\Scripts\activate
-
-# Mac/Linux
-source .venv/bin/activate
-```
-
-### 3. Zainstaluj wymagane biblioteki
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Pobierz model spaCy
-
-```bash
-python -m spacy download en_core_web_sm
+docker-compose up --build
 ```
 
 ##  Struktura plików
