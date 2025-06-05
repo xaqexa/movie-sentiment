@@ -1,17 +1,32 @@
 # Analizator Sentymentu Recenzji Filmowych
 
-Aplikacja internetowa do automatycznej analizy sentymentu recenzji filmowych z wykorzystaniem technik NLP    oraz Machine Learning
+Aplikacja internetowa do automatycznej analizy sentymentu recenzji filmowych z wykorzystaniem technik NLP oraz Machine Learning
 
 ##  Instalacja
 
+### 1. Sklonuj repozytorium
+```bash
+git clone https://github.com/xaqexa/movie-sentiment.git
+cd movie-sentiment
+```
+### 2. Stwórz środowisko wirtualne
+```bash
+python -m venv .venv
 
-### 1. Zainstaluj wymagane biblioteki
+# Windows
+.venv\Scripts\activate
+
+# Mac/Linux
+source .venv/bin/activate
+```
+
+### 3. Zainstaluj wymagane biblioteki
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Pobierz model spaCy
+### 4. Pobierz model spaCy
 
 ```bash
 python -m spacy download en_core_web_sm
