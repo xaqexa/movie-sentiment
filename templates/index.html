@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizator Sentymentu Recenzji</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .result.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result.positive {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: 2px solid #4facfe;
+        }
+
+        .result.negative {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            border: 2px solid #fa709a;
+        }
+
+        .result.error {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+            color: white;
+            border: 2px solid #ff6b6b;
+        }
+
+        .confidence {
+            margin-top: 15px;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .probabilities {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            gap: 20px;
+        }
+
+        .prob-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            flex: 1;
+            backdrop-filter: blur(5px);
+        }
+
+        .prob-title {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .prob-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .examples {
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .examples h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .example-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #e0e0e0;
+        }
+
+        .example-item:hover {
+            background: #667eea;
+            color: white;
+            transform: translateX(5px);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .probabilities {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Analizator Sentymentu</h1>
+        <p class="subtitle">Sprawdź czy Twoja recenzja filmu jest pozytywna czy negatywna</p>
+        
+        <form id="sentimentForm">
+            <div class="form-group">
+                <label for="review">Wprowadź recenzję filmu:</label>
+                <textarea 
+                    id="review" 
+                    name="review" 
+                    placeholder="Napisz tutaj swoją recenzję filmu... Na przykład: 'Ten film był absolutnie fantastyczny! Świetna fabuła i doskonała gra aktorska.'"
+                    required
+                ></textarea>
+            </div>
+            
+            <div class="btn-container">
+                <button type="submit" id="analyzeBtn">
+                    Analizuj Sentyment
+                </button>
+            </div>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            Analizuję Twoją recenzję...
+        </div>
+
+        <div class="result" id="result"></div>
+
+        <div class="examples">
+            <h3>💡 Przykładowe recenzje:</h3>
+            <div class="example-item" onclick="setExample(this)">
+                "This movie was absolutely amazing! The plot was engaging and the acting was superb."
+            </div>
+            <div class="example-item" onclick="setExample(this)">
+                "Worst movie I've ever seen. Terrible acting and boring storyline."
+            </div>
+            <div class="example-item" onclick="setExample(this)">
+                "The cinematography was beautiful but the story felt a bit slow at times."
+            </div>
+            <div class="example-item" onclick="setExample(this)">
+                "Outstanding performance by the lead actor. This film will definitely win awards!"
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('sentimentForm');
+        const result = document.getElementById('result');
+        const loading = document.getElementById('loading');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const reviewTextarea = document.getElementById('review');
+
+        function setExample(element) {
+            reviewTextarea.value = element.textContent.replace(/[""]/g, '');
+            reviewTextarea.focus();
+        }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const reviewText = reviewTextarea.value.trim();
+            
+            if (!reviewText) {
+                showResult('Proszę wprowadzić tekst recenzji', 'error');
+                return;
+            }
+
+            if (reviewText.length < 10) {
+                showResult('Recenzja musi mieć co najmniej 10 znaków', 'error');
+                return;
+            }
+
+            // Pokaż loading
+            showLoading(true);
+            hideResult();
+
+            try {
+                const formData = new FormData();
+                formData.append('review', reviewText);
+
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    showResult(data.error, 'error');
+                } else {
+                    showSentimentResult(data);
+                }
+            } catch (error) {
+                showResult('Błąd podczas łączenia z serwerem. Spróbuj ponownie.', 'error');
+                console.error('Error:', error);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        function showLoading(show) {
+            loading.classList.toggle('show', show);
+            analyzeBtn.disabled = show;
+            analyzeBtn.textContent = show ? 'Analizuję...' : 'Analizuj Sentyment';
+        }
+
+        function hideResult() {
+            result.classList.remove('show');
+        }
+
+        function showResult(message, type) {
+            result.className = `result ${type}`;
+            result.innerHTML = message;
+            
+            setTimeout(() => {
+                result.classList.add('show');
+            }, 100);
+        }
+
+        function showSentimentResult(data) {
+            const sentimentIcon = data.sentiment === 'positive' ? '😊' : '😔';
+            const sentimentColor = data.sentiment === 'positive' ? 'positive' : 'negative';
+            
+            const resultHTML = `
+                <div style="font-size: 2em; margin-bottom: 15px;">${sentimentIcon}</div>
+                <div>Sentyment: <strong>${data.sentiment_pl.toUpperCase()}</strong></div>
+                <div class="confidence">Pewność: ${data.confidence}%</div>
+                <div class="probabilities">
+                    <div class="prob-card">
+                        <div class="prob-title">Pozytywny</div>
+                        <div class="prob-value">${data.positive_prob}%</div>
+                    </div>
+                    <div class="prob-card">
+                        <div class="prob-title">Negatywny</div>
+                        <div class="prob-value">${data.negative_prob}%</div>
+                    </div>
+                </div>
+            `;
+            
+            showResult(resultHTML, sentimentColor);
+        }
+
+        // Dodaj animację na textarea
+        reviewTextarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    </script>
+</body>
+</html>

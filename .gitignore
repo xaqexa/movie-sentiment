@@ -1,0 +1,18 @@
+# Pliki Pythona
+__pycache__/
+*.py[cod]
+
+# Modele i dane tymczasowe
+*.pkl
+preprocessed.csv
+
+# Środowisko
+.env
+venv/
+env/
+
+# IDE/system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
