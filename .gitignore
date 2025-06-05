@@ -10,3 +10,4 @@ env/
 Thumbs.db
 .vscode/
 .idea/
+preprocessed.csv
